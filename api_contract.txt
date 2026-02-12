@@ -1,0 +1,213 @@
+===========================================
+Market Data Service – API Contracts (v1)
+===========================================
+
+Base URL:
+---------
+/api/v1/market
+
+
+-------------------------------------------
+1. Search Forex Pairs
+-------------------------------------------
+Purpose:
+- Search forex pairs for UI search
+- Used when adding pairs to watchlist
+
+Endpoint:
+GET /api/v1/market/pairs
+
+Query Params:
+- q (string, optional) → search keyword (EUR, USD, etc.)
+
+Example:
+GET /api/v1/market/pairs?q=EUR
+
+Response:
+{
+  "pairs": [
+    {
+      "id": 1,
+      "symbol": "EURUSD",
+      "base": "EUR",
+      "quote": "USD"
+    }
+  ]
+}
+
+
+-------------------------------------------
+2. Get Latest Price (Single Pair)
+-------------------------------------------
+Purpose:
+- Show current price
+- Used for trade execution
+- Used in dashboard tiles
+
+Endpoint:
+GET /api/v1/market/prices/latest
+
+Query Params:
+- pair (string, required) → e.g. EURUSD
+
+Example:
+GET /api/v1/market/prices/latest?pair=EURUSD
+
+Response:
+{
+  "pair": "EURUSD",
+  "price": 1.08421,
+  "bid": 1.08418,
+  "ask": 1.08424,
+  "timestamp": "2026-02-09T10:30:00Z"
+}
+
+
+-------------------------------------------
+3. Get Latest Prices (Bulk)
+-------------------------------------------
+Purpose:
+- Efficient watchlist price updates
+- Avoid multiple API calls
+
+Endpoint:
+POST /api/v1/market/prices/latest/bulk
+
+Request Body:
+{
+  "pairs": ["EURUSD", "USDJPY", "GBPUSD"]
+}
+
+Response:
+{
+  "prices": {
+    "EURUSD": {
+      "price": 1.08421,
+      "timestamp": "2026-02-09T10:30:00Z"
+    },
+    "USDJPY": {
+      "price": 149.12,
+      "timestamp": "2026-02-09T10:30:00Z"
+    }
+  }
+}
+
+
+-------------------------------------------
+4. Get Historical Candles
+-------------------------------------------
+Purpose:
+- Chart rendering
+- Indicator calculation
+- Backtesting
+
+Endpoint:
+GET /api/v1/market/candles
+
+Query Params:
+- pair (string, required) → EURUSD
+- timeframe (string, required) → 1m, 5m, 1h, 1d
+- limit (int, optional) → number of candles
+- from (ISO timestamp, optional)
+
+Example:
+GET /api/v1/market/candles?pair=EURUSD&timeframe=1h&limit=100
+
+Response:
+{
+  "pair": "EURUSD",
+  "timeframe": "1h",
+  "candles": [
+    {
+      "timestamp": "2026-02-09T09:00:00Z",
+      "open": 1.0839,
+      "high": 1.0850,
+      "low": 1.0835,
+      "close": 1.0842,
+      "volume": 12345
+    }
+  ]
+}
+
+
+-------------------------------------------
+5. Get Supported Timeframes
+-------------------------------------------
+Purpose:
+- Populate timeframe dropdowns
+- Validation on frontend
+
+Endpoint:
+GET /api/v1/market/timeframes
+
+Response:
+{
+  "timeframes": ["1m", "5m", "15m", "1h", "4h", "1d"]
+}
+
+
+-------------------------------------------
+6. Get Market Status
+-------------------------------------------
+Purpose:
+- Show if forex market is open
+- Improve UX
+
+Endpoint:
+GET /api/v1/market/status
+
+Response:
+{
+  "is_open": true,
+  "session": "London",
+  "timestamp": "2026-02-09T10:30:00Z"
+}
+
+
+-------------------------------------------
+7. Internal Service API (Not Public)
+-------------------------------------------
+Purpose:
+- Used by Trading Service
+- Used by Analytics Service
+
+Endpoint:
+GET /internal/market/latest-price
+
+Query Params:
+- pair (string, required)
+
+Response:
+{
+  "pair": "EURUSD",
+  "price": 1.08421,
+  "timestamp": "2026-02-09T10:30:00Z"
+}
+
+
+-------------------------------------------
+8. Error Response Format
+-------------------------------------------
+Used by all endpoints
+
+Response:
+{
+  "error": {
+    "code": "PAIR_NOT_FOUND",
+    "message": "Forex pair EURXYZ is not supported"
+  }
+}
+
+
+-------------------------------------------
+Notes:
+-------------------------------------------
+- All timestamps are ISO 8601 (UTC)
+- Latest prices are served from Redis first
+- Candles are read from PostgreSQL
+- API is versioned (/api/v1)
+- Designed for monolith now, microservices later
+
+===========================================
+END OF FILE
+===========================================

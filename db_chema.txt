@@ -1,0 +1,134 @@
+forex_pair
+---------
+id (PK)
+symbol           -- "EURUSD"
+base_currency    -- "EUR"
+quote_currency   -- "USD"
+is_active
+created_at
+
+UNIQUE(symbol)
+INDEX(base_currency, quote_currency)
+
+forex_candle
+------------
+id (PK)
+pair_id (FK -> forex_pair.id)
+timeframe        -- ENUM: 1m, 5m, 15m, 1h, 4h, 1d
+open
+high
+low
+close
+volume
+timestamp        -- candle close time
+
+UNIQUE(pair_id, timeframe, timestamp)
+INDEX(pair_id, timeframe, timestamp DESC)
+INDEX(timestamp DESC)
+
+
+forex_price_snapshot
+--------------------
+id (PK)
+pair_id (FK)
+price
+bid
+ask
+timestamp
+
+UNIQUE(pair_id)
+INDEX(timestamp DESC)
+
+
+watchlist
+---------
+id (PK)
+user_id (FK)
+name
+created_at
+
+INDEX(user_id)
+
+
+watchlist_item
+--------------
+id (PK)
+watchlist_id (FK)
+pair_id (FK)
+
+UNIQUE(watchlist_id, pair_id)
+INDEX(pair_id)
+
+
+trading_account
+---------------
+id (PK)
+user_id (FK)
+balance
+currency        -- default "USD"
+created_at
+
+UNIQUE(user_id)
+
+
+trade
+-----
+id (PK)
+account_id (FK)
+pair_id (FK)
+side            -- BUY / SELL
+price
+quantity
+timestamp
+
+INDEX(account_id, timestamp DESC)
+INDEX(pair_id)
+
+
+position
+--------
+id (PK)
+account_id (FK)
+pair_id (FK)
+net_quantity
+avg_price
+updated_at
+
+UNIQUE(account_id, pair_id)
+
+
+indicator_value
+---------------
+id (PK)
+pair_id (FK)
+indicator        -- RSI, SMA, EMA
+timeframe
+value
+timestamp
+
+UNIQUE(pair_id, indicator, timeframe, timestamp)
+INDEX(pair_id, timeframe, timestamp DESC)
+
+
+news_article
+------------
+id (PK)
+source
+title
+content
+published_at
+url
+
+INDEX(published_at DESC)
+
+
+sentiment_score
+---------------
+id (PK)
+article_id (FK)
+pair_id (FK)
+score
+model_version
+created_at
+
+INDEX(pair_id, created_at DESC)

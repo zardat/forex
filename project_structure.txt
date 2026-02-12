@@ -1,0 +1,26 @@
+forex_platform/
+├── apps/
+│   ├── market_data/
+│   │   ├── models/
+│   │   │   ├── pair.py
+│   │   │   ├── candle.py
+│   │   │   └── snapshot.py
+│   │   ├── services/
+│   │   │   ├── price_service.py
+│   │   │   └── candle_service.py
+│   │   ├── providers/
+│   │   │   ├── base.py
+│   │   │   └── twelvedata.py
+│   │   ├── tasks/
+│   │   │   └── polling.py
+│   │   ├── api/
+│   │   │   ├── views.py
+│   │   │   └── serializers.py
+│   │   └── apps.py
+│   │
+│   ├── trading/              (later)
+│   ├── users/                (auth/watchlist)
+│   ├── analytics/            (later)
+│   └── common/
+│       ├── redis.py
+│       └── utils.py

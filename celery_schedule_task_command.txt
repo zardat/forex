@@ -1,0 +1,15 @@
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
+import json
+schedule, created = IntervalSchedule.objects.get_or_create(
+    period=IntervalSchedule.SECONDS 
+    every=time,
+)
+>>> PeriodicTask.objects.update_or_create(
+     name="NAME OF TASK",
+     defaults={
+         "interval": schedule,
+         "task": "market.tasks.poll_latest_prices",
+         "args": json.dumps([]),
+         "enabled": True,
+     },
+)
