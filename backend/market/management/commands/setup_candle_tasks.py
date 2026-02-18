@@ -1,5 +1,5 @@
 """
-Django management command to set up periodic candle aggregation tasks.
+Django management command to set up periodic tasks for price polling and candle aggregation.
 Usage: python manage.py setup_candle_tasks
 """
 
@@ -9,10 +9,50 @@ from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 
 class Command(BaseCommand):
-    help = 'Set up periodic tasks for aggregating candles from price snapshots'
+    help = 'Set up periodic tasks for price polling and aggregating candles from price snapshots'
 
     def handle(self, *args, **options):
-        """Create or update periodic tasks for candle aggregation"""
+        """Create or update periodic tasks for price polling and candle aggregation"""
+        
+        created_count = 0
+        updated_count = 0
+        
+        # First, set up the price polling task (runs every 30 seconds)
+        self.stdout.write(self.style.SUCCESS('\n=== Setting up Price Polling Task ==='))
+        price_schedule, price_schedule_created = IntervalSchedule.objects.get_or_create(
+            every=30,
+            period=IntervalSchedule.SECONDS,
+        )
+        
+        if price_schedule_created:
+            self.stdout.write(
+                self.style.SUCCESS('Created interval schedule: 30 seconds')
+            )
+        
+        price_task, price_task_created = PeriodicTask.objects.update_or_create(
+            name="Poll latest prices",
+            defaults={
+                "interval": price_schedule,
+                "task": "market.tasks.poll_latest_prices",
+                "args": json.dumps([]),
+                "enabled": True,
+                "description": "Poll latest prices for all active forex pairs every 30 seconds",
+            }
+        )
+        
+        if price_task_created:
+            created_count += 1
+            self.stdout.write(
+                self.style.SUCCESS('✓ Created periodic task: Poll latest prices')
+            )
+        else:
+            updated_count += 1
+            self.stdout.write(
+                self.style.WARNING('↻ Updated periodic task: Poll latest prices')
+            )
+        
+        # Then, set up candle aggregation tasks
+        self.stdout.write(self.style.SUCCESS('\n=== Setting up Candle Aggregation Tasks ==='))
         
         # Define intervals: (interval_name, every_seconds, description)
         candle_intervals = [
@@ -21,9 +61,6 @@ class Command(BaseCommand):
             ('1h', 3600, '1 hour'),         # Every 1 hour
             ('1d', 86400, '1 day'),         # Every 1 day
         ]
-        
-        created_count = 0
-        updated_count = 0
         
         for interval_name, every_seconds, description in candle_intervals:
             # Create or get interval schedule
@@ -68,16 +105,26 @@ class Command(BaseCommand):
         )
         self.stdout.write(
             self.style.SUCCESS(
-                'Periodic tasks are now scheduled. Make sure Celery Beat is running!'
-            )
-        )
-        self.stdout.write(
-            self.style.WARNING(
-                '\nTo start Celery Beat: celery -A core beat -l info'
+                '\nAll periodic tasks are now scheduled:'
             )
         )
         self.stdout.write(
             self.style.SUCCESS(
-                '\nNote: Price snapshots are stored in ForexPriceHistory when poll_latest_prices runs.'
+                '  • Price polling: every 30 seconds'
+            )
+        )
+        self.stdout.write(
+            self.style.SUCCESS(
+                '  • Candle aggregation: 5m, 15m, 1h, 1d intervals'
+            )
+        )
+        self.stdout.write(
+            self.style.WARNING(
+                '\n⚠ Make sure Celery Beat is running!'
+            )
+        )
+        self.stdout.write(
+            self.style.WARNING(
+                'To start Celery Beat: celery -A core beat -l info'
             )
         )
