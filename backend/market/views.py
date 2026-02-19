@@ -1,3 +1,11 @@
+"""
+Views for market app.
+"""
 from django.shortcuts import render
 
-# Create your views here.
+
+def api_test_page(request):
+    """
+    Test page for API endpoints.
+    """
+    return render(request, 'market/api_test.html')

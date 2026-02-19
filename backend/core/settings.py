@@ -125,6 +125,22 @@ CACHES = {
 CACHE_TTL = 3600  # seconds
 
 
+# REST Framework configuration
+REST_FRAMEWORK = {
+    'DEFAULT_VERSIONING_CLASS': 'market.api.versioning.MarketAPIVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1'],
+    'VERSION_PARAM': 'version',
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
+    'DEFAULT_PAGINATION_CLASS': None,  # No pagination by default
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
