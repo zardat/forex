@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market API Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .endpoint-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .endpoint-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .method-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .method-get {
+            background: #28a745;
+            color: white;
+        }
+        
+        .method-post {
+            background: #007bff;
+            color: white;
+        }
+        
+        .endpoint-url {
+            font-family: 'Courier New', monospace;
+            background: #e9ecef;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+        }
+        
+        .response-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .response-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        
+        .response-content {
+            background: #2d3748;
+            color: #68d391;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .error {
+            color: #fc8181;
+        }
+        
+        .loading {
+            color: #fbbf24;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status-200 {
+            background: #28a745;
+            color: white;
+        }
+        
+        .status-400, .status-404 {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status-500 {
+            background: #fd7e14;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Market API Test Page</h1>
+        <p class="subtitle">Test all Market API v1 endpoints interactively</p>
+        
+        <!-- Search Pairs -->
+        <div class="endpoint-section">
+            <div class="endpoint-title">
+                <span class="method-badge method-get">GET</span>
+                <span>Search Forex Pairs</span>
+            </div>
+            <div class="endpoint-url">/api/v1/market/pairs?q={query}</div>
+            <div class="form-group">
+                <label for="pair-query">Search Query (optional):</label>
+                <input type="text" id="pair-query" placeholder="e.g. EUR, USD, EURUSD" value="">
+            </div>
+            <button onclick="testSearchPairs()">Test Endpoint</button>
+            <div class="response-section" id="pair-response" style="display: none;">
+                <div class="response-label">Response: <span id="pair-status"></span></div>
+                <div class="response-content" id="pair-content"></div>
+            </div>
+        </div>
+        
+        <!-- Latest Price -->
+        <div class="endpoint-section">
+            <div class="endpoint-title">
+                <span class="method-badge method-get">GET</span>
+                <span>Get Latest Price</span>
+            </div>
+            <div class="endpoint-url">/api/v1/market/prices/latest?pair={pair}</div>
+            <div class="form-group">
+                <label for="latest-pair">Pair Symbol (required):</label>
+                <input type="text" id="latest-pair" placeholder="e.g. EURUSD" value="EURUSD">
+            </div>
+            <button onclick="testLatestPrice()">Test Endpoint</button>
+            <div class="response-section" id="latest-response" style="display: none;">
+                <div class="response-label">Response: <span id="latest-status"></span></div>
+                <div class="response-content" id="latest-content"></div>
+            </div>
+        </div>
+        
+        <!-- Bulk Prices -->
+        <div class="endpoint-section">
+            <div class="endpoint-title">
+                <span class="method-badge method-get">GET</span>
+                <span>Get Bulk Prices</span>
+            </div>
+            <div class="endpoint-url">/api/v1/market/prices/latest/bulk?pairs={pairs}</div>
+            <div class="form-group">
+                <label for="bulk-pairs">Pairs (comma-separated):</label>
+                <input type="text" id="bulk-pairs" placeholder="e.g. EURUSD,USDJPY,GBPUSD" value="EURUSD,USDJPY,GBPUSD">
+            </div>
+            <button onclick="testBulkPrices()">Test Endpoint</button>
+            <div class="response-section" id="bulk-response" style="display: none;">
+                <div class="response-label">Response: <span id="bulk-status"></span></div>
+                <div class="response-content" id="bulk-content"></div>
+            </div>
+        </div>
+        
+        <!-- Candles -->
+        <div class="endpoint-section">
+            <div class="endpoint-title">
+                <span class="method-badge method-get">GET</span>
+                <span>Get Historical Candles</span>
+            </div>
+            <div class="endpoint-url">/api/v1/market/candles?pair={pair}&timeframe={timeframe}&limit={limit}</div>
+            <div class="form-group">
+                <label for="candle-pair">Pair Symbol:</label>
+                <input type="text" id="candle-pair" placeholder="e.g. EURUSD" value="EURUSD">
+            </div>
+            <div class="form-group">
+                <label for="candle-timeframe">Timeframe:</label>
+                <input type="text" id="candle-timeframe" placeholder="e.g. 1h, 1d, 5m" value="1h">
+            </div>
+            <div class="form-group">
+                <label for="candle-limit">Limit (optional):</label>
+                <input type="number" id="candle-limit" placeholder="e.g. 100" value="10">
+            </div>
+            <button onclick="testCandles()">Test Endpoint</button>
+            <div class="response-section" id="candle-response" style="display: none;">
+                <div class="response-label">Response: <span id="candle-status"></span></div>
+                <div class="response-content" id="candle-content"></div>
+            </div>
+        </div>
+        
+        <!-- Timeframes -->
+        <div class="endpoint-section">
+            <div class="endpoint-title">
+                <span class="method-badge method-get">GET</span>
+                <span>Get Supported Timeframes</span>
+            </div>
+            <div class="endpoint-url">/api/v1/market/timeframes</div>
+            <button onclick="testTimeframes()">Test Endpoint</button>
+            <div class="response-section" id="timeframe-response" style="display: none;">
+                <div class="response-label">Response: <span id="timeframe-status"></span></div>
+                <div class="response-content" id="timeframe-content"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = '/api/v1/market';
+        
+        function showResponse(elementId, statusId, status, data, isError = false) {
+            const responseDiv = document.getElementById(elementId);
+            const statusSpan = document.getElementById(statusId);
+            const contentDiv = document.getElementById(elementId.replace('-response', '-content'));
+            
+            responseDiv.style.display = 'block';
+            statusSpan.textContent = '';
+            statusSpan.className = 'status-badge status-' + status;
+            statusSpan.textContent = `Status: ${status}`;
+            
+            if (isError) {
+                contentDiv.className = 'response-content error';
+            } else {
+                contentDiv.className = 'response-content';
+            }
+            
+            contentDiv.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        }
+        
+        async function testSearchPairs() {
+            const query = document.getElementById('pair-query').value.trim();
+            let url = `${API_BASE}/pairs`;
+            if (query) {
+                url += `?q=${encodeURIComponent(query)}`;
+            }
+            
+            showResponse('pair-response', 'pair-status', '...', 'Loading...', false);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                showResponse('pair-response', 'pair-status', response.status, data, !response.ok);
+            } catch (error) {
+                showResponse('pair-response', 'pair-status', 'ERROR', error.message, true);
+            }
+        }
+        
+        async function testLatestPrice() {
+            const pair = document.getElementById('latest-pair').value.trim();
+            if (!pair) {
+                alert('Please enter a pair symbol');
+                return;
+            }
+            
+            const url = `${API_BASE}/prices/latest?pair=${encodeURIComponent(pair)}`;
+            showResponse('latest-response', 'latest-status', '...', 'Loading...', false);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                showResponse('latest-response', 'latest-status', response.status, data, !response.ok);
+            } catch (error) {
+                showResponse('latest-response', 'latest-status', 'ERROR', error.message, true);
+            }
+        }
+        
+        async function testBulkPrices() {
+            const pairsText = document.getElementById('bulk-pairs').value.trim();
+            
+            if (!pairsText) {
+                alert('Please enter comma-separated pairs like: EURUSD,USDJPY,GBPUSD');
+                return;
+            }
+            
+            const url = `${API_BASE}/prices/latest/bulk?pairs=${encodeURIComponent(pairsText)}`;
+            showResponse('bulk-response', 'bulk-status', '...', 'Loading...', false);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                showResponse('bulk-response', 'bulk-status', response.status, data, !response.ok);
+            } catch (error) {
+                showResponse('bulk-response', 'bulk-status', 'ERROR', error.message, true);
+            }
+        }
+        
+        async function testCandles() {
+            const pair = document.getElementById('candle-pair').value.trim();
+            const timeframe = document.getElementById('candle-timeframe').value.trim();
+            const limit = document.getElementById('candle-limit').value.trim();
+            
+            if (!pair || !timeframe) {
+                alert('Please enter pair and timeframe');
+                return;
+            }
+            
+            let url = `${API_BASE}/candles?pair=${encodeURIComponent(pair)}&timeframe=${encodeURIComponent(timeframe)}`;
+            if (limit) {
+                url += `&limit=${encodeURIComponent(limit)}`;
+            }
+            
+            showResponse('candle-response', 'candle-status', '...', 'Loading...', false);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                showResponse('candle-response', 'candle-status', response.status, data, !response.ok);
+            } catch (error) {
+                showResponse('candle-response', 'candle-status', 'ERROR', error.message, true);
+            }
+        }
+        
+        async function testTimeframes() {
+            const url = `${API_BASE}/timeframes`;
+            showResponse('timeframe-response', 'timeframe-status', '...', 'Loading...', false);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                showResponse('timeframe-response', 'timeframe-status', response.status, data, !response.ok);
+            } catch (error) {
+                showResponse('timeframe-response', 'timeframe-status', 'ERROR', error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>
+
